@@ -24,11 +24,14 @@ public class MyReciever extends BroadcastReceiver {
         if(intent.getAction().equals("REBOOT")) {
             startService(context);
              }
+        if(intent.getAction().equals(START_SERVICE_ALARM_ACTION)){
+            startService(context);
+        }
         }
 
     protected void startService(Context context){
         Intent i = new Intent(context,OUService.class);
-        i.putExtra(Intent.EXTRA_TEXT, "test");
+        i.putExtra(Intent.EXTRA_TEXT, "reboot");
         context.startService(i);
     }
     }

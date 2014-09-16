@@ -21,13 +21,10 @@ public class MyActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(START_SERVICE_ACTION);
-        intentFilter.addAction(PROCESS_RESULT_ACTION);
-        intentFilter.addAction(MyReciever.START_SERVICE_ALARM_ACTION);
-        registerReceiver(new MyReciever(), intentFilter);
+
+
         Intent intent = new Intent(getApplicationContext(),OUService.class);
-        sendBroadcast(intent);
+        getApplicationContext().startService(intent);
     }
 
 

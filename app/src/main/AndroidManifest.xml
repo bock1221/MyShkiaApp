@@ -25,6 +25,7 @@
         <receiver android:name=".MyReciever">
         <intent-filter>
             <action android:name="android.intent.action.REBOOT"/>
+
         </intent-filter>
         </receiver>
     </application>

@@ -24,12 +24,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import static android.app.AlarmManager.RTC_WAKEUP;
+
 /**
  * Created by tzvi on 8/31/14.
  */
 public class OUService extends IntentService {
     String shkia = "";
     Long milliTime;
+    public static int counter =0;
 
     public OUService() {
         super("OUService");
@@ -38,19 +41,20 @@ public class OUService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        if(intent.getStringExtra(Intent.EXTRA_TEXT).equals(getString(R.string.alarm))){
+        Log.v("secondtime","good");
+        if(intent.getStringExtra(Intent.EXTRA_TEXT)!=null){
+            String text = intent.getStringExtra(Intent.EXTRA_TEXT);
+            Log.v("onHandle",text);
+            //fetchData();
+            String message = "It is 15 minutes bfore shkia dont forget to daven mincha";
+            publishResult(message);
+            }else{
             fetchData();
             Log.v("alarmManager","started up" );
-            String message ="It is 15 minutes bfore shkia dont forget to daven mincha";
+            String message ="shkia is at";
             publishResult(message);
-        } else{
-        String text = intent.getStringExtra(Intent.EXTRA_TEXT);
-        Log.v("onHandle",text);
-        fetchData();
-        String message = "shkia is at";
-        publishResult(message);
-        parseTime();
-        broadcastIntent();
+            parseTime();
+            broadcastIntent();
         }
     }
 
@@ -65,7 +69,6 @@ public class OUService extends IntentService {
     }
 
     protected void broadcastIntent(){
-        Context context = getApplicationContext();
         long currentTime = System.currentTimeMillis();
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY,0);
@@ -74,15 +77,16 @@ public class OUService extends IntentService {
         long timeStartDay = calendar.getTime().getTime();
         long secondsOfDay = currentTime - timeStartDay;
         long alarmTime = milliTime-secondsOfDay;
-        Intent i = new Intent(context,OUService.class);
-        i.putExtra(Intent.EXTRA_TEXT, context.getString(R.string.alarm));
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
         // Schedule an alarm to start up the service every so often
-        AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         Long milliShkia = timeStartDay + alarmTime;
         Date shkiaDate = new Date(milliShkia);
         Log.v("shkia formatted" ,shkiaDate.toString());
-        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, 0, 15 * 1000/*AlarmManager.INTERVAL_FIFTEEN_MINUTES*/, pendingIntent);
+        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        Intent i = new Intent(this,MyReciever.class);
+        i.setAction(MyReciever.START_SERVICE_ALARM_ACTION);
+        i.putExtra(Intent.EXTRA_TEXT, "alarm");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, 0);
+        am.set(AlarmManager.RTC_WAKEUP,currentTime+15000/*AlarmManager.INTERVAL_FIFTEEN_MINUTES*/, pendingIntent);
     }
 
     protected void fetchData(){
@@ -122,10 +126,11 @@ public class OUService extends IntentService {
 
     private void publishResult(String message){
     Log.v("publishResult",message);
+
         Notification.Builder nb = new Notification.Builder(this);
         nb.setSmallIcon(R.drawable.ic_launcher);
         nb.setContentTitle(message);
-        nb.setContentText(shkia);
+        nb.setContentText(""+shkia);
         Notification notification = nb.build();
         NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         nm.notify(0, notification);
